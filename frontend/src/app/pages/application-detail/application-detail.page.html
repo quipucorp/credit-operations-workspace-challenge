@@ -1,0 +1,122 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-title>Detalle de Solicitud</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <main class="page-shell">
+    <section class="topbar">
+      <a routerLink="/" class="back-link">Volver a solicitudes</a>
+    </section>
+
+    <section class="detail-nav">
+      <button type="button" (click)="goToPrevious()">Anterior</button>
+      <button type="button" (click)="goToNext()">Siguiente</button>
+    </section>
+
+    <section class="debug-banner" *ngIf="(state.requestedApplicationId$ | async) as requestedId">
+      <p><strong>Ruta actual:</strong> {{ requestedId }}</p>
+      <p><strong>Datos cargados:</strong> {{ (state.selectedApplication$ | async)?.id || 'todavía ninguno' }}</p>
+      <p *ngIf="state.isDetailLoading$ | async">Actualizando solicitud...</p>
+    </section>
+
+    <section class="banner error" *ngIf="state.detailError$ | async as errorMessage" [class.hidden]="!errorMessage">
+      {{ errorMessage }}
+    </section>
+
+    <ng-container *ngIf="state.selectedApplication$ | async as application; else loadingState">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Resumen de la Solicitud</p>
+          <h1>{{ application.applicantName }}</h1>
+          <p class="intro">{{ application.businessName }} · {{ application.documentNumber }}</p>
+        </div>
+
+        <app-status-badge [status]="application.status"></app-status-badge>
+      </section>
+
+      <section class="layout">
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Resumen de la solicitud</h2>
+            <span *ngIf="state.isActionLoading$ | async">Guardando...</span>
+          </div>
+
+          <dl class="key-values">
+            <div>
+              <dt>Monto solicitado</dt>
+              <dd>{{ application.requestedAmount | currency:'COP':'symbol':'1.0-0' }}</dd>
+            </div>
+            <div>
+              <dt>Plazo</dt>
+              <dd>{{ application.termMonths }} meses</dd>
+            </div>
+            <div>
+              <dt>Ingresos mensuales</dt>
+              <dd>{{ application.monthlyRevenue | currency:'COP':'symbol':'1.0-0' }}</dd>
+            </div>
+            <div>
+              <dt>Analista asignado</dt>
+              <dd>{{ application.assignedAnalyst || 'Sin asignar' }}</dd>
+            </div>
+            <div>
+              <dt>Última actualización</dt>
+              <dd>{{ application.lastUpdatedAt | date:'short' }}</dd>
+            </div>
+          </dl>
+
+          <div class="status-actions">
+            <button type="button" (click)="updateStatus('in_review')">Mover a revisión</button>
+            <button type="button" (click)="updateStatus('approved')">Aprobar</button>
+            <button type="button" class="danger" (click)="updateStatus('rejected')">Rechazar</button>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Score</h2>
+          <app-score-summary [score]="application.score" [reason]="application.scoreReason"></app-score-summary>
+        </article>
+
+        <article class="panel">
+          <h2>Asignar a analista</h2>
+          <p class="muted">
+            Esta acción quedó intencionalmente incompleta en el starter. Completala end to end y mantené la UI sincronizada.
+          </p>
+
+          <label class="assignment-field">
+            Analista
+            <select [formControl]="analystIdControl">
+              <option value="">Seleccionar analista</option>
+              <option *ngFor="let analyst of (analysts$ | async) ?? []" [value]="analyst.id">
+                {{ analyst.name }} · {{ analyst.team }}
+              </option>
+            </select>
+          </label>
+
+          <button type="button" (click)="saveAssignment()">Guardar asignación</button>
+        </article>
+
+        <article class="panel full-width">
+          <h2>Historial de estados</h2>
+
+          <div class="history-row" *ngFor="let entry of application.statusHistory">
+            <strong>{{ entry.toStatus }}</strong>
+            <span>{{ entry.changedBy }}</span>
+            <span>{{ entry.changedAt | date:'short' }}</span>
+          </div>
+        </article>
+      </section>
+    </ng-container>
+
+    <ng-template #loadingState>
+      <section class="panel loading-panel">
+        <p *ngIf="state.isDetailLoading$ | async; else emptyState">Cargando detalle de la solicitud...</p>
+      </section>
+    </ng-template>
+
+    <ng-template #emptyState>
+      <p class="muted">Seleccioná una solicitud desde la lista.</p>
+    </ng-template>
+  </main>
+</ion-content>

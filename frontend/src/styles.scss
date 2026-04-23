@@ -1,0 +1,41 @@
+:root {
+  --surface: #f4f1ea;
+  --panel: #fffdf8;
+  --line: #e4ddcf;
+  --ink: #1f2933;
+  --muted: #69707d;
+  --accent: #006b5f;
+  --accent-soft: #e3f2ec;
+  --ion-font-family: Georgia, "Times New Roman", serif;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(13, 122, 95, 0.12), transparent 28%),
+    linear-gradient(180deg, #fbfaf6 0%, #f1ece3 100%);
+}
+
+ion-app,
+ion-content,
+ion-header,
+ion-toolbar,
+ion-title {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.page-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+}

@@ -1,0 +1,69 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-title>Centro de Operaciones de Crédito</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <main class="page-shell" *ngIf="state.filters$ | async as filters">
+    <section class="hero">
+      <p class="eyebrow">Herramienta Interna</p>
+      <h1>Solicitudes de Crédito</h1>
+      <p class="intro">
+        Revisá solicitudes entrantes, movelas a través del flujo y consultá el contexto del score.
+      </p>
+    </section>
+
+    <section class="toolbar">
+      <label>
+        Estado
+        <select [value]="filters.status" (change)="onStatusFilterChange($event)">
+          <option *ngFor="let option of statusOptions" [value]="option">
+            {{ option === 'all' ? 'Todos los estados' : option }}
+          </option>
+        </select>
+      </label>
+
+      <button type="button" (click)="state.loadApplications()">Actualizar lista</button>
+    </section>
+
+    <section class="banner error" *ngIf="state.listError$ | async as errorMessage" [class.hidden]="!errorMessage">
+      {{ errorMessage }}
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Bandeja de solicitudes</h2>
+        <span *ngIf="state.isListLoading$ | async">Cargando...</span>
+      </div>
+
+      <ng-container *ngIf="state.applications$ | async as applications">
+        <div class="empty" *ngIf="!applications.length && !(state.isListLoading$ | async)">
+          No hay solicitudes para el filtro actual.
+        </div>
+
+        <a
+          *ngFor="let application of applications; trackBy: trackById"
+          class="list-row"
+          [routerLink]="['/applications', application.id]"
+        >
+          <div class="row-top">
+            <div>
+              <strong>{{ application.applicantName }}</strong>
+              <p>{{ application.businessName || application.documentNumber }}</p>
+            </div>
+
+            <app-status-badge [status]="application.status"></app-status-badge>
+          </div>
+
+          <div class="row-meta">
+            <span>{{ application.requestedAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>Score {{ application.score }}</span>
+            <span>{{ application.assignedAnalyst || 'Sin asignar' }}</span>
+            <span>{{ application.createdAt | date:'shortDate' }}</span>
+          </div>
+        </a>
+      </ng-container>
+    </section>
+  </main>
+</ion-content>
